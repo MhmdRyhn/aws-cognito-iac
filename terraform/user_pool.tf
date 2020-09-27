@@ -9,18 +9,18 @@
 // It'll be better than using `provisioner "local-exec"{}`.
 
 resource "aws_cognito_user_pool" "terrapool" {
-  # What do you want to name your user pool?
+  # Cognito: What do you want to name your user pool?
   name = "${local.prefix}-${var.user_pool_name}"
 
-  # How do you want your end users to sign in?
+  # Cognito: How do you want your end users to sign in?
   username_attributes = ["email"]
 
-  # (Recommended) Enable case insensitivity for username input
+  # Cognito: (Recommended) Enable case insensitivity for username input
   username_configuration {
     case_sensitive = false
   }
 
-  # What password strength do you want to require?
+  # Cognito: What password strength do you want to require?
   password_policy {
     minimum_length                   = 6
     require_lowercase                = true
@@ -30,22 +30,24 @@ resource "aws_cognito_user_pool" "terrapool" {
     temporary_password_validity_days = 7
   }
 
-  # Do you want to allow users to sign themselves up?
+  # Cognito: Do you want to allow users to sign themselves up?
   admin_create_user_config {
     allow_admin_create_user_only = false
   }
 
-  # Which standard attributes do you want to require?
+  # Cognito: Which standard attributes do you want to require?
   schema {
     name                = "email"
     attribute_data_type = "String"
     required            = true
+    // Allow users to update the field's value
+    mutable = true
   }
 
-  # Which attributes do you want to verify?
+  # Cognito: Which attributes do you want to verify?
   auto_verified_attributes = ["email"]
 
-  # Do you want to customize your email verification messages?
+  # Cognito: Do you want to customize your email verification messages?
   verification_message_template {
     # All are default value
     default_email_option = "CONFIRM_WITH_CODE"
@@ -53,7 +55,7 @@ resource "aws_cognito_user_pool" "terrapool" {
     email_message        = "Your verification code is {####}"
   }
 
-  # Do you want to add tags for this user pool?
+  # Cognito: Do you want to add tags for this user pool?
   tags = {
     Name        = "${local.tag_prefix}:${var.user_pool_name}"
     Environment = var.environment
@@ -62,19 +64,19 @@ resource "aws_cognito_user_pool" "terrapool" {
 
 
 resource "aws_cognito_user_pool_client" "client" {
-  # User Pool ID
+  # Cognito: User Pool ID
   user_pool_id = aws_cognito_user_pool.terrapool.id
 
-  # App client name
+  # Cognito: App client name
   name = var.app_client_name
 
-  # Refresh token expiration (days)
+  # Cognito: Refresh token expiration (days)
   refresh_token_validity = 30
 
-  # [x] Generate client secret
+  # Cognito: [x] Generate client secret
   generate_secret = false // Don't create client Secret along with the Id.
 
-  # Auth Flows Configuration
+  # Cognito: Auth Flows Configuration
   explicit_auth_flows = [
     "ALLOW_REFRESH_TOKEN_AUTH",
     "ALLOW_USER_PASSWORD_AUTH",
@@ -82,6 +84,6 @@ resource "aws_cognito_user_pool_client" "client" {
     "ALLOW_CUSTOM_AUTH"
   ]
 
-  # Prevent User Existence Errors
+  # Cognito: Prevent User Existence Errors
   prevent_user_existence_errors = "ENABLED"
 }
