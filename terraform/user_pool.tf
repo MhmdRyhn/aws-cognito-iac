@@ -1,13 +1,3 @@
-// NOTE: How will a user be able to recover their account?
-// This option under `MFA and verifications` is not supported yet in terraform.
-// An issue has been raised in github and it's still open.
-// https://github.com/terraform-providers/terraform-provider-aws/issues/11220
-
-// WARNING: Don't use `provisioner "local-exec"{}` to set account recovery mechanism.
-// It'll wipe out the whole configuration.
-// You can manually update this option after the orchastration of your resources.
-// It'll be better than using `provisioner "local-exec"{}`.
-
 resource "aws_cognito_user_pool" "terrapool" {
   # Cognito: What do you want to name your user pool?
   name = "${local.prefix}-${var.user_pool_name}"
@@ -28,6 +18,19 @@ resource "aws_cognito_user_pool" "terrapool" {
     require_symbols                  = true
     require_uppercase                = true
     temporary_password_validity_days = 7
+  }
+
+  # How will a user be able to recover their account?
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+
+    recovery_mechanism {
+      name     = "verified_phone_number"
+      priority = 2
+    }
   }
 
   # Cognito: Do you want to allow users to sign themselves up?

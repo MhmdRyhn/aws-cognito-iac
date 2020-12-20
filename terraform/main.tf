@@ -30,5 +30,5 @@ terraform {
 provider "aws" {
   profile = var.aws_profile
   region  = var.aws_region
-  version = "~> 3.8"
+  version = "~> 3.22.0"
 }
